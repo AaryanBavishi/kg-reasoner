@@ -1,0 +1,40 @@
+Object:
+
+Shape:
+  derivedFrom: Object
+
+Shape3D:
+  derivedFrom: Shape
+  properties:
+    Volume: qk:Volume
+    Area: qk:Area
+    Mass: qk:Mass
+    MassDensity: qk:MassDensity
+  equations:
+    - MassDensity = Mass / Volume
+
+Sphere:
+  derivedFrom: Shape3D
+  properties:
+    Radius: qk:Length
+    Diameter: qk:Length
+  equations:
+    - Diameter = 2 * Radius
+    - Volume = 4/3 * pi * Radius**3
+    - Area = 4 * pi * Radius**2
+
+Cuboid:
+  derivedFrom: Shape3D
+  properties:
+    Length: qk:Length
+    Width: qk:Length
+    Height: qk:Length
+  equations:
+    - Volume = Length * Width * Height
+    - Area = 2 * Length * Width + 2 * Length * Height + 2 * Width * Height
+
+Cube:
+  derivedFrom: Cuboid
+  equations:
+    - Width = Length
+    - Height = Length
