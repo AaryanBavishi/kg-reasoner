@@ -1,0 +1,56 @@
+@prefix : <http://sites.psu.edu/reinhartgroup/mykg/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix scidata: <https://stuchalk.github.io/scidata/ontology/scidata.owl#> .
+
+# abstractions and datatypes
+:physicalProperty rdfs:subClassOf scidata:property .
+  # :hasValue ;
+  # :quantityKind ;
+
+:measurement
+  rdfs:subClassOf :property ;
+.
+
+:realValue
+  rdfs:subClassOf scidata:value ;
+.
+
+:positiveRealValue
+  rdfs:subClassOf :realValue ;
+.
+
+# shapes
+:Shape a rdfs:Class .
+
+:Shape3D
+  rdfs:subClassOf :Shape ;
+  :physicalProperty :Volume ;
+  :physicalProperty :Area ;
+.
+
+:Cuboid
+  rdfs:subClassOf :Shape3D ;
+  :physicalProperty :Length ;
+  :physicalProperty :Height ;
+  :physicalProperty :Width ;
+  :hasRelation "Volume = Length * Height * Width"^^xsd:string ;
+.
+
+# properties
+:Length
+  a rdfs:Class ;
+  rdfs:subclassOf :property ;
+  rdfs:subClassOf :positiveRealValue ;
+  scidata:quantityKind qudt:quantitykind:Length ;
+.
+
+:Volume
+  a rdfs:Class ;
+  rdfs:subclassOf :property, :positiveRealValue ;
+  scidata:quantityKind qudt:quantitykind:Volume ;
+.

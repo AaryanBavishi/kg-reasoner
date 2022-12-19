@@ -1,0 +1,46 @@
+@prefix : <http://sites.psu.edu/reinhartgroup/mykg/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix scidata: <https://stuchalk.github.io/scidata/ontology/scidata.owl#> .
+# this file is meant for defining the SHACL shapes!
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+:PhysicalPropertyShape a sh:NodeShape ;
+    sh:targetClass :PhysicalProperty ;
+    sh:property [
+        sh:path :hasValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path :quantity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path :quantityKind ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+.
+
+:realValueShape a sh:NodeShape ;
+    sh:targetClass :realValue ;
+    sh:property [
+        sh:path qudt:numericValue ;
+        sh:or ( [ sh:datatype xsd:double ] [ sh:datatype xsd:float ] [ sh:datatype xsd:decimal ] [ sh:datatype xsd:integer] ) ;
+        sh:minCount 1 ;
+    ] ;
+.
+
+:positiveRealValueShape a sh:NodeShape ;
+    sh:targetClass :positiveRealValue ;
+    sh:property [
+        sh:path qudt:numericValue ;
+        sh:nodeKind sh:Literal ;
+        sh:minInclusive 0.0 ;
+    ] ;
+.
