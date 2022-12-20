@@ -2,6 +2,8 @@ import networkx as nx
 import yaml
 from sympy import symbols, Eq, solve, pi
 import re
+import pyshacl
+import rdflib
 
 
 class Reasoner(object):
@@ -176,3 +178,80 @@ class Reasoner(object):
 
         filled_obj = {k.replace(f"{obj['type']}.", ''): v for k, v in obj.items()}
         return filled_obj
+
+
+class RDFRenderer(object):
+    rdf_template_ = None
+
+    def __init__(self):
+        self.rdf_ = self.rdf_template_
+
+    def __str__(self):
+        return self.rdf_
+
+
+class DataValueTemplate(RDFRenderer):
+    rdf_template_ = """
+:<NAME> a :<TYPE> ;
+  qudt:numericValue <VALUE> ;
+  qudt:unit unit:<UNIT> ;
+.
+"""
+
+    def __init__(self, instances):
+        super().__init__()
+        required = ['name', 'type', 'value', 'unit']
+        for key in required:
+            if key not in instances.keys():
+                raise ValueError(f'{key} not in substitutions dict')
+        for key, value in instances.items():
+            self.rdf_ = self.rdf_.replace(f'<{key.upper()}>', str(value))
+
+
+class DataGraphTemplate(RDFRenderer):
+    rdf_template_ = """
+prefix : <http://sites.psu.edu/reinhartgroup/mykg/>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+"""
+
+    def __init__(self, instances):
+        super().__init__()
+        for item in instances:
+            self.rdf_ += str(DataValueTemplate(item))
+
+    def as_graph(self):
+        graph = rdflib.Graph()
+        graph.parse(data=self.rdf_, format='turtle')
+        return graph
+
+
+class Validator(object):
+    sparql_query = """
+SELECT ?focus
+  WHERE {
+    ?id rdf:type sh:ValidationResult .
+    ?id sh:focusNode ?focus .
+  }
+"""
+
+    def __init__(self, ont_graph, shacl_graph):
+        self.ont_graph = ont_graph
+        self.shacl_graph = shacl_graph
+
+    def run(self, data_graph):
+        result = pyshacl.validate(data_graph,
+                                  shacl_graph=self.shacl_graph,
+                                  ont_graph=self.ont_graph,
+                                  inference='rdfs', debug=False,
+                                  serialize_report_graph=False)
+        conforms, v_graph, v_text = result
+
+        result = v_graph.query(self.sparql_query)
+        bad_URI = [list(it.values())[0] for it in result.bindings]
+        bad_nodes = [it.toPython().split('/')[-1] for it in bad_URI]
+
+        return bad_nodes
