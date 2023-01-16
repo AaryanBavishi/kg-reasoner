@@ -179,6 +179,47 @@ class Reasoner(object):
         filled_obj = {k.replace(f"{obj['type']}.", ''): v for k, v in obj.items()}
         return filled_obj
 
+class ShaclValidator:
+    def __init__(self, data):
+        self.data = data
+        self.shape_graph = rdflib.Graph()
+        self._define_shapes()
+
+    def validate(self):
+        data_graph = rdflib.Graph()
+        for value in self.data.items():
+            data_graph+=DataValueTemplate(value)
+            
+        data_graph.parse(data=data_graph, format='turtle')        
+        results = validate(data_graph, shacl_graph=self.shape_graph)
+        if results:
+            print("Validation results:")
+            for result in results:
+                print(result.message)
+        else:
+            print("Data is valid.")
+
+    def _define_shapes(self):
+        self.shacl_graph.parse(data="""
+            prefix : <http://sites.psu.edu/reinhartgroup/mykg/>
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+:myRule a sh:NodeShape ;             # enforce a Shape on the Node with type Measurement (name <myRule> can be anything)
+    sh:targetClass :Measurement ;    # this should apply to :Measurement and all its subClasses
+    sh:property [
+        sh:path qudt:numericValue ;  # place constraints on the numericValue of the :Measurement
+        sh:nodeKind sh:Literal ;     # make sure we are evaluating a literal
+        sh:or ( [ sh:datatype xsd:double ] [ sh:datatype xsd:float ] [ sh:datatype xsd:decimal ] ) ;  # enforce certain datatypes
+        sh:minInclusive 0.0 ;        # enforce >=0 values
+        sh:minCount 1 ;              # enforce at least 1 qudt:numericValue
+        sh:maxCount 1 ;              # enforce at most 1 qudt:numericValue
+    ] .
+""", format='turtle')
 
 class RDFRenderer(object):
     rdf_template_ = None
