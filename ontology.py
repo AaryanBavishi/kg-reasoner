@@ -164,17 +164,19 @@ class Reasoner(object):
                     results = [root.evalf(subs=obj) for root in sol]
                     # check validity
                     # TODO: make this more elegant using xsd logic
-                    instanceof = sub_ont.nodes[str(symbol)]['kind']
-                    valuesof = self.graph_.nodes[instanceof]['hasvaluesof']
-                    validity = self.graph_.nodes[valuesof]['valid']
-                    is_valid = [validity(it) for it in results]
-                    result = [r for r, v in zip(results, is_valid) if v]
-                    if len(result) == 1:
-                        if verbose:
-                            print(f'    {edge[2]} -> {result[0]}')
-                        obj[edge[2]] = result[0]
-                    elif len(result) > 1:
-                        raise ValueError(f'Multiply defined value for {edge[2]}:' + str(result))
+                    validator = ShaclValidator(sub_ont)
+                    validator.validate()
+                   # instanceof = sub_ont.nodes[str(symbol)]['kind']
+                   # valuesof = self.graph_.nodes[instanceof]['hasvaluesof']
+                   # validity = self.graph_.nodes[valuesof]['valid']
+                   # is_valid = [validity(it) for it in results]
+                   # result = [r for r, v in zip(results, is_valid) if v]
+                   # if len(result) == 1:
+                   #     if verbose:
+                   #         print(f'    {edge[2]} -> {result[0]}')
+                   #     obj[edge[2]] = result[0]
+                   # elif len(result) > 1:
+                    #    raise ValueError(f'Multiply defined value for {edge[2]}:' + str(result))
 
         filled_obj = {k.replace(f"{obj['type']}.", ''): v for k, v in obj.items()}
         return filled_obj
