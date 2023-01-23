@@ -3,6 +3,7 @@ import yaml
 from sympy import symbols, Eq, solve, pi
 import re
 import pyshacl
+from rdflib_shacl import validate
 import rdflib
 
 
