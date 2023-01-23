@@ -202,7 +202,7 @@ class ShaclValidator:
             print("Data is valid.")
 
     def _define_shapes(self):
-        self.shacl_graph.parse(data="""
+        self.shape_graph.parse(data="""
             prefix : <http://sites.psu.edu/reinhartgroup/mykg/>
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
