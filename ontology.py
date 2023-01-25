@@ -194,7 +194,7 @@ class ShaclValidator:
             data_graph+=DataValueTemplate(value)
             
         data_graph.parse(data=data_graph, format='turtle')        
-        results = validate(data_graph, shacl_graph=self.shape_graph)
+        results = pyshacl.validate(data_graph, shacl_graph=self.shape_graph)
         if results:
             print("Validation results:")
             for result in results:
