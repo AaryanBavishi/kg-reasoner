@@ -3,7 +3,6 @@ import yaml
 from sympy import symbols, Eq, solve, pi
 import re
 import pyshacl
-from rdflib_shacl import validate
 import rdflib
 
 
@@ -192,15 +191,15 @@ class ShaclValidator:
         data_graph = rdflib.Graph()
         for value in self.data.items():
             data_graph+=DataValueTemplate(value)
-            
+             
         data_graph.parse(data=data_graph, format='turtle')        
-        results = pyshacl.validate(data_graph, shacl_graph=self.shape_graph)
-        if results:
-            print("Validation results:")
-            for result in results:
-                print(result.message)
-        else:
-            print("Data is valid.")
+        results = pyshacl.validate(data_graph, shacl_graph=self.shape_graph, inference='rdfs', debug=False,
+                                  serialize_report_graph=False)
+        conforms, v_graph, v_text = result
+        result = v_graph.query(self._define_shapes)
+        bad_URI = [list(it.values())[0] for it in result.bindings]
+        bad_nodes = [it.toPython().split('/')[-1] for it in bad_URI]
+        return bad_nodes
 
     def _define_shapes(self):
         self.shape_graph.parse(data="""
